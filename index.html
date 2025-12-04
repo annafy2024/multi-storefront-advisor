@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Storefront Architecture Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-hover: #22222e;
+            --accent-green: #95bf47;
+            --accent-green-dim: rgba(149, 191, 71, 0.15);
+            --accent-purple: #8b5cf6;
+            --accent-purple-dim: rgba(139, 92, 246, 0.15);
+            --accent-orange: #f59e0b;
+            --accent-orange-dim: rgba(245, 158, 11, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-blue-dim: rgba(59, 130, 246, 0.15);
+            --accent-red: #ef4444;
+            --accent-red-dim: rgba(239, 68, 68, 0.15);
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --border-hover: #3f3f46;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Animated background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, var(--accent-green-dim) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, var(--accent-purple-dim) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, var(--accent-blue-dim) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 2rem;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-card);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-purple));
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Question card */
+        .question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-hint {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Options */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-hover);
+            transform: translateX(4px);
+        }
+
+        .option.selected {
+            border-color: var(--accent-green);
+            background: var(--accent-green-dim);
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .option.selected .option-radio {
+            border-color: var(--accent-green);
+        }
+
+        .option.selected .option-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--accent-green);
+            border-radius: 50%;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .option-example {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border-radius: 10px;
+            font-family: 'Sora', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green), #7aa832);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(149, 191, 71, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Results */
+        .results {
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: var(--accent-green-dim);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, var(--accent-green-dim), var(--accent-purple-dim));
+            border: 1px solid var(--accent-green);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recommendation-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .recommendation-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-desc {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .feature-item.supported {
+            color: var(--accent-green);
+        }
+
+        .feature-item.not-supported {
+            color: var(--text-muted);
+        }
+
+        /* Reasoning section */
+        .reasoning-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .reasoning-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .reasoning-list {
+            list-style: none;
+        }
+
+        .reasoning-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .reasoning-item:last-child {
+            border-bottom: none;
+        }
+
+        .reasoning-icon {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .reasoning-text strong {
+            color: var(--text-primary);
+        }
+
+        .reasoning-text span {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Alternatives */
+        .alternatives-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alt-option {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .alt-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .alt-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Examples section */
+        .examples-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .example-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .example-item:last-child {
+            border-bottom: none;
+        }
+
+        .example-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .example-name {
+            font-weight: 500;
+        }
+
+        .example-url {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Summary table */
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-table td:first-child {
+            color: var(--text-secondary);
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Start screen */
+        .start-screen {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .start-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--accent-green-dim), var(--accent-purple-dim));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .start-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .start-desc {
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+        }
+
+        .start-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .start-feature {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .start-feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .start-feature-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 640px) {
+            .start-features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🏗️</div>
+                <h1>Multi-Storefront Advisor</h1>
+            </div>
+            <p class="subtitle">Find the optimal Shopify architecture for your multi-brand setup</p>
+        </header>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="start-screen">
+            <div class="start-icon">🎯</div>
+            <h2 class="start-title">Architecture Decision Tool</h2>
+            <p class="start-desc">
+                Answer 10 questions about your multi-storefront requirements and get a personalized architecture recommendation with reasoning.
+            </p>
+            <div class="start-features">
+                <div class="start-feature">
+                    <div class="start-feature-icon">⏱️</div>
+                    <div class="start-feature-text">~3 minutes</div>
+                </div>
+                <div class="start-feature">
+                    <div class="start-feature-icon">📊</div>
+                    <div class="start-feature-text">10 questions</div>
+                </div>
+                <div class="start-feature">
+                    <div class="start-feature-icon">💡</div>
+                    <div class="start-feature-text">5 architecture options</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startQuiz()">
+                Start Assessment →
+            </button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="hidden">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-text">Question 1 of 10</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+            </div>
+
+            <div id="question-container"></div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()">
+                    ← Back
+                </button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>
+                    Continue →
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden results"></div>
+    </div>
+
+    <script>
+        // Questions data
+        const questions = [
+            {
+                id: 'domains',
+                category: 'Architecture',
+                question: 'How should your storefront URLs appear to customers?',
+                hint: 'Consider how customers will navigate between your brands.',
+                options: [
+                    {
+                        value: 'single',
+                        title: 'Single domain with paths/sections',
+                        example: 'brand.com/mens, brand.com/womens'
+                    },
+                    {
+                        value: 'subdomains',
+                        title: 'Subdomains of one root domain',
+                        example: 'mens.brand.com, brand-a.brand.com'
+                    },
+                    {
+                        value: 'unique',
+                        title: 'Unique root domains per brand',
+                        example: 'brand-a.com, brand-b.com'
+                    },
+                    {
+                        value: 'mixed',
+                        title: 'Mix of domains and subdomains',
+                        example: 'brand-a.com, pro.brand-a.com, brand-b.com'
+                    }
+                ]
+            },
+            {
+                id: 'checkout_branding',
+                category: 'Architecture',
+                question: 'Must the checkout experience match each brand\'s look and feel?',
+                hint: 'Shopify checkout is tied to the store backend — 1 store = 1 checkout design.',
+                options: [
+                    {
+                        value: 'required',
+                        title: 'Yes — each brand needs its own checkout branding',
+                        example: 'Different logos, colors, messaging per brand'
+                    },
+                    {
+                        value: 'shared',
+                        title: 'No — shared or neutral checkout is acceptable',
+                        example: 'Parent company branding or minimal design'
+                    },
+                    {
+                        value: 'dynamic',
+                        title: 'Dynamic branding based on cart contents',
+                        example: 'Logo changes based on which brand products are in cart'
+                    }
+                ]
+            },
+            {
+                id: 'customer_accounts',
+                category: 'Architecture',
+                question: 'When a customer logs into their customer account overview, should they see orders from all brands or only "their" brand?',
+                hint: 'Customer accounts are tied to the store — 1 store = 1 unified account.',
+                options: [
+                    {
+                        value: 'unified',
+                        title: 'Unified — customers see all orders across brands',
+                        example: 'One login, complete order history from all brands'
+                    },
+                    {
+                        value: 'separated',
+                        title: 'Separated — customers only see orders from that brand',
+                        example: 'Brand A login shows only Brand A orders'
+                    },
+                    {
+                        value: 'sso_filtered',
+                        title: 'SSO with filtered views',
+                        example: 'Same login, but filtered order history (custom dev)'
+                    }
+                ]
+            },
+            {
+                id: 'shared_cart',
+                category: 'Architecture',
+                question: 'Must customers add products from multiple brands into ONE shopping cart?',
+                hint: 'Cross-brand cart sharing has technical implications.',
+                options: [
+                    {
+                        value: 'required',
+                        title: 'Yes — shared cart is critical for all brands',
+                        example: 'Brand A + Brand B + Brand C products in same checkout'
+                    },
+                    {
+                        value: 'partial',
+                        title: 'Partial — shared cart for some brands, separate for others',
+                        example: 'Brand A + Brand B share cart, but Brand C is independent'
+                    },
+                    {
+                        value: 'not_required',
+                        title: 'No — separate carts per brand is fine',
+                        example: 'Each brand has independent checkout'
+                    },
+                    {
+                        value: 'nice_to_have',
+                        title: 'Nice to have, but not a dealbreaker',
+                        example: 'Would prefer shared, can live without'
+                    }
+                ]
+            },
+            {
+                id: 'b2b',
+                category: 'Business',
+                question: 'Do you have B2B (business-to-business) selling requirements?',
+                hint: 'B2B adds complexity with company management, price lists, and payment terms.',
+                options: [
+                    {
+                        value: 'none',
+                        title: 'No B2B — D2C only',
+                        example: 'All sales are direct to consumer'
+                    },
+                    {
+                        value: 'single_brand',
+                        title: 'B2B on one brand/storefront only',
+                        example: 'Only Brand A has wholesale customers'
+                    },
+                    {
+                        value: 'blended',
+                        title: 'B2B blended on same storefronts as D2C',
+                        example: 'Same site, different experience when logged in as B2B'
+                    },
+                    {
+                        value: 'separate_portals',
+                        title: 'Separate B2B portals per brand',
+                        example: 'brand-a-pro.com, brand-b-wholesale.com'
+                    },
+                    {
+                        value: 'multi_brand_b2b',
+                        title: 'B2B storefront aggregating multiple brand catalogs',
+                        example: 'wholesale.company.com with products from all brands'
+                    }
+                ]
+            },
+            {
+                id: 'product_catalog',
+                category: 'Implementation',
+                question: 'How are products organized across your storefronts?',
+                hint: 'This affects whether product sync is needed between stores.',
+                options: [
+                    {
+                        value: 'same_products',
+                        title: 'Same products, different presentations',
+                        example: 'Same catalog shown differently per brand'
+                    },
+                    {
+                        value: 'completely_different',
+                        title: 'Completely different product lines',
+                        example: 'Brand A sells shoes, Brand B sells apparel'
+                    },
+                    {
+                        value: 'overlap_exclusives',
+                        title: 'Some overlap with brand exclusives',
+                        example: 'Shared core products + brand-specific items'
+                    },
+                    {
+                        value: 'separate_plus_aggregator',
+                        title: 'Separate catalogs per brand, plus one storefront that aggregates all',
+                        example: 'Brand A has its catalog, Brand B has its catalog, but Brand C combines A + B products'
+                    },
+                    {
+                        value: 'aggregated',
+                        title: 'One storefront aggregates products from all brands',
+                        example: 'Marketplace storefront combining all brand catalogs'
+                    }
+                ]
+            },
+            {
+                id: 'inventory',
+                category: 'Implementation',
+                question: 'How is inventory managed across your storefronts?',
+                hint: 'Inventory sync complexity varies by architecture.',
+                options: [
+                    {
+                        value: 'single_warehouse',
+                        title: 'Single warehouse, shared inventory',
+                        example: 'All brands ship from same location'
+                    },
+                    {
+                        value: 'separate_inventory',
+                        title: 'Separate inventory per brand',
+                        example: 'Each brand has its own stock allocation'
+                    },
+                    {
+                        value: 'multi_location',
+                        title: 'Multi-location with complex allocation',
+                        example: 'Multiple warehouses, store stock, dropship'
+                    }
+                ]
+            },
+            {
+                id: 'team_capacity',
+                category: 'Implementation',
+                question: 'What development resources are available for implementation?',
+                hint: 'This affects the feasibility of headless vs. headed approaches.',
+                options: [
+                    {
+                        value: 'solo',
+                        title: 'Solo operator or small non-technical team',
+                        example: '1-2 people managing e-commerce, limited dev skills'
+                    },
+                    {
+                        value: 'small_team',
+                        title: 'Small team with some technical capacity',
+                        example: '3-5 people, can handle theme customization'
+                    },
+                    {
+                        value: 'dev_team',
+                        title: 'In-house dev team or strong agency partnership',
+                        example: 'React/Next.js capabilities, can build custom'
+                    },
+                    {
+                        value: 'enterprise',
+                        title: 'Enterprise team with dedicated engineering',
+                        example: 'Full dev team, DevOps, long-term maintenance capacity'
+                    }
+                ]
+            },
+            {
+                id: 'content_needs',
+                category: 'Implementation',
+                question: 'How content-rich are your storefront experiences?',
+                hint: 'Heavy content needs often favor headless architectures.',
+                options: [
+                    {
+                        value: 'minimal',
+                        title: 'Minimal — standard product pages',
+                        example: 'Product catalog, basic landing pages'
+                    },
+                    {
+                        value: 'moderate',
+                        title: 'Moderate — blog, lookbooks, some custom pages',
+                        example: 'Editorial content, seasonal campaigns'
+                    },
+                    {
+                        value: 'heavy',
+                        title: 'Heavy — rich media, interactive experiences',
+                        example: 'Configurators, 3D views, complex storytelling'
+                    },
+                    {
+                        value: 'cms_driven',
+                        title: 'CMS-driven with external content system',
+                        example: 'Contentful, Sanity, or similar headless CMS'
+                    }
+                ]
+            },
+            {
+                id: 'timeline_budget',
+                category: 'Implementation',
+                question: 'What are your timeline and budget constraints?',
+                hint: 'Speed to market vs. long-term flexibility trade-off.',
+                options: [
+                    {
+                        value: 'fast_cheap',
+                        title: 'Fast and cost-effective',
+                        example: 'Launch quickly, minimize initial investment'
+                    },
+                    {
+                        value: 'balanced',
+                        title: 'Balanced — reasonable timeline, moderate budget',
+                        example: '3-6 month timeline, willing to invest'
+                    },
+                    {
+                        value: 'quality',
+                        title: 'Quality over speed — invest in doing it right',
+                        example: '6-12 month timeline, significant budget'
+                    },
+                    {
+                        value: 'enterprise_timeline',
+                        title: 'Enterprise timeline with phased rollout',
+                        example: '12+ months, multi-phase implementation'
+                    }
+                ]
+            }
+        ];
+
+        // Architecture definitions
+        const architectures = {
+            'A': {
+                name: 'Single Store + Sections',
+                shortName: 'Option A',
+                description: 'One Shopify store with different sections or collections representing each brand. Simplest setup, ideal for sub-brands under one umbrella.',
+                icon: '📦',
+                features: {
+                    'Unique domains': false,
+                    'Brand-specific checkout': false,
+                    'Separated accounts': false,
+                    'Native shared cart': true,
+                    'Per-brand permissions': false,
+                    'Lower dev cost': true,
+                    'Lower maintenance': true,
+                    'Clean B2B separation': false
+                },
+                examples: [
+                    { name: 'Urban Planet', url: 'urbanplanet.com/collections/...' }
+                ],
+                tradeoffs: {
+                    pros: ['Simplest to implement', 'Native shared cart', 'Lowest cost', 'Single inventory'],
+                    cons: ['Limited brand distinction', 'No separate domains', 'SEO challenges', 'No brand permissions']
+                }
+            },
+            'B': {
+                name: 'Single Store + Alias Domains',
+                shortName: 'Option B',
+                description: 'One Shopify store with multiple domains pointing to it, using conditional rendering in Liquid based on the hostname.',
+                icon: '🔗',
+                features: {
+                    'Unique domains': true,
+                    'Brand-specific checkout': false,
+                    'Separated accounts': false,
+                    'Native shared cart': true,
+                    'Per-brand permissions': false,
+                    'Lower dev cost': false,
+                    'Lower maintenance': false,
+                    'Clean B2B separation': false
+                },
+                examples: [
+                    { name: 'Being Well', url: 'bloomspa.beingwell.com' },
+                    { name: 'Being Well', url: 'blendbeautybar.beingwell.com' }
+                ],
+                tradeoffs: {
+                    pros: ['Unique domains per brand', 'Single admin', 'Shared cart', 'Single inventory'],
+                    cons: ['Complex theme logic', 'No checkout separation', 'Limited production examples', 'No brand permissions']
+                }
+            },
+            'C': {
+                name: 'Multiple Stores (Headed)',
+                shortName: 'Option C',
+                description: 'Separate Shopify stores for each brand with native Liquid themes. Most common approach for distinct brand separation.',
+                icon: '🏪',
+                features: {
+                    'Unique domains': true,
+                    'Brand-specific checkout': true,
+                    'Separated accounts': true,
+                    'Native shared cart': false,
+                    'Per-brand permissions': true,
+                    'Lower dev cost': false,
+                    'Lower maintenance': false,
+                    'Clean B2B separation': true
+                },
+                examples: [
+                    { name: 'Cobra Golf', url: 'cobragolf.com' },
+                    { name: 'Puma Golf', url: 'pumagolf.com' }
+                ],
+                tradeoffs: {
+                    pros: ['Full brand separation', 'Independent operations', 'Clean B2B', 'Standard Shopify skills'],
+                    cons: ['Product sync needed', 'Multiple admin panels', 'Higher Shopify costs', 'Inventory sync complexity']
+                }
+            },
+            'D': {
+                name: 'Single Store + Headless',
+                shortName: 'Option D',
+                description: 'One Shopify store backend with multiple custom frontend storefronts (Hydrogen, Next.js, etc.).',
+                icon: '⚡',
+                features: {
+                    'Unique domains': true,
+                    'Brand-specific checkout': false,
+                    'Separated accounts': false,
+                    'Native shared cart': true,
+                    'Per-brand permissions': false,
+                    'Lower dev cost': false,
+                    'Lower maintenance': false,
+                    'Clean B2B separation': false
+                },
+                examples: [
+                    { name: 'Custom Hydrogen builds', url: 'Multiple custom storefronts' }
+                ],
+                tradeoffs: {
+                    pros: ['Ultimate frontend flexibility', 'Single catalog', 'Shared cart across domains', 'Best performance'],
+                    cons: ['High dev cost', 'No checkout separation', 'Unified accounts', 'Requires experienced team']
+                }
+            },
+            'E': {
+                name: 'Multiple Stores + Headless',
+                shortName: 'Option E',
+                description: 'Separate Shopify stores, each with custom headless frontends. Maximum flexibility and separation.',
+                icon: '🚀',
+                features: {
+                    'Unique domains': true,
+                    'Brand-specific checkout': true,
+                    'Separated accounts': true,
+                    'Native shared cart': false,
+                    'Per-brand permissions': true,
+                    'Lower dev cost': false,
+                    'Lower maintenance': false,
+                    'Clean B2B separation': true
+                },
+                examples: [
+                    { name: 'Defyned Brands', url: 'anabolicwarfare.com' },
+                    { name: 'Defyned Brands', url: 'foxyfit.com' }
+                ],
+                tradeoffs: {
+                    pros: ['Maximum flexibility', 'Full brand separation', 'Best performance', 'Clean B2B'],
+                    cons: ['Highest cost', 'Most complex', 'Product sync + custom frontends', 'Requires enterprise resources']
+                }
+            }
+        };
+
+        let currentQuestion = 0;
+        let answers = {};
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-section').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            const container = document.getElementById('question-container');
+            
+            let optionsHtml = q.options.map(opt => `
+                <div class="option ${answers[q.id] === opt.value ? 'selected' : ''}" 
+                     onclick="selectOption('${q.id}', '${opt.value}')">
+                    <div class="option-radio"></div>
+                    <div class="option-content">
+                        <div class="option-title">${opt.title}</div>
+                        <div class="option-example">${opt.example}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">${q.category} • Question ${currentQuestion + 1}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="question-hint">${q.hint}</div>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+
+            updateProgress();
+            updateNavButtons();
+        }
+
+        function selectOption(questionId, value) {
+            answers[questionId] = value;
+            renderQuestion();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('progress-percent').textContent = `${Math.round(progress)}%`;
+        }
+
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            prevBtn.style.visibility = currentQuestion === 0 ? 'hidden' : 'visible';
+            nextBtn.disabled = !answers[questions[currentQuestion].id];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Results →' : 'Continue →';
+        }
+
+        function nextQuestion() {
+            if (!answers[questions[currentQuestion].id]) return;
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function calculateRecommendation() {
+            let scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+            let reasoning = [];
+            let constraints = [];
+
+            // Domain structure
+            if (answers.domains === 'single') {
+                scores.A += 10;
+                reasoning.push({ factor: 'Single domain preference', supports: 'Option A', detail: 'Single domain with sections is the simplest approach' });
+            } else if (answers.domains === 'subdomains') {
+                scores.B += 5;
+                scores.D += 5;
+                reasoning.push({ factor: 'Subdomain structure', supports: 'Options B, D', detail: 'Subdomains enable shared cookies for easier cart sharing' });
+            } else {
+                scores.C += 3;
+                scores.E += 3;
+                reasoning.push({ factor: 'Unique domains', supports: 'Options C, E', detail: 'Unique domains work best with separate stores' });
+            }
+
+            // Checkout branding - HARD CONSTRAINT
+            if (answers.checkout_branding === 'required') {
+                scores.A = -100;
+                scores.B = -100;
+                scores.D = -100;
+                constraints.push('Brand-specific checkout required → Eliminates single-store options');
+                scores.C += 10;
+                scores.E += 10;
+                reasoning.push({ factor: 'Checkout branding required', supports: 'Options C, E', detail: 'Only multi-store architectures support distinct checkout branding' });
+            } else {
+                scores.A += 3;
+                scores.B += 3;
+                scores.D += 3;
+            }
+
+            // Customer accounts - HARD CONSTRAINT
+            if (answers.customer_accounts === 'separated') {
+                scores.A = -100;
+                scores.B = -100;
+                scores.D = -100;
+                constraints.push('Separated customer accounts required → Eliminates single-store options');
+                scores.C += 10;
+                scores.E += 10;
+                reasoning.push({ factor: 'Separated accounts required', supports: 'Options C, E', detail: 'Only multi-store architectures support separate customer accounts' });
+            } else {
+                scores.A += 2;
+                scores.B += 2;
+                scores.D += 2;
+            }
+
+            // Shared cart - HARD CONSTRAINT
+            if (answers.shared_cart === 'required') {
+                scores.C -= 5;
+                scores.E -= 5;
+                scores.A += 5;
+                scores.B += 5;
+                scores.D += 5;
+                reasoning.push({ factor: 'Shared cart required', supports: 'Options A, B, D', detail: 'Single-store architectures provide native shared cart' });
+            } else if (answers.shared_cart === 'partial') {
+                // Partial shared cart suggests hybrid: some brands on shared store, others separate
+                scores.C += 2;
+                scores.E += 3;
+                reasoning.push({ factor: 'Partial shared cart (some brands share, others separate)', supports: 'Options C, E', detail: 'Hybrid approach: group sharing brands on one store, keep others separate. Multi-store gives flexibility to mix architectures.' });
+                constraints.push('Partial shared cart → Consider hybrid: brands needing shared cart on one store, independent brands on separate stores');
+            }
+
+            // B2B requirements
+            if (answers.b2b === 'separate_portals' || answers.b2b === 'multi_brand_b2b') {
+                scores.C += 5;
+                scores.E += 5;
+                reasoning.push({ factor: 'Complex B2B requirements', supports: 'Options C, E', detail: 'Multi-store provides cleaner B2B company and pricing separation' });
+            } else if (answers.b2b === 'blended') {
+                scores.C += 3;
+                scores.E += 3;
+            }
+
+            // Product catalog
+            if (answers.product_catalog === 'aggregated') {
+                scores.D += 3;
+                reasoning.push({ factor: 'Aggregated catalog needed', supports: 'Option D', detail: 'Single-store headless can aggregate catalogs natively; multi-store needs sync' });
+            } else if (answers.product_catalog === 'completely_different') {
+                scores.C += 3;
+                scores.E += 3;
+                reasoning.push({ factor: 'Distinct product lines', supports: 'Options C, E', detail: 'Separate stores naturally organize distinct catalogs' });
+            } else if (answers.product_catalog === 'separate_plus_aggregator') {
+                scores.C += 4;
+                scores.E += 4;
+                reasoning.push({ factor: 'Separate catalogs + one aggregator storefront', supports: 'Options C, E', detail: 'Multi-store with product sync to aggregator. Each brand gets clean separation, aggregator pulls from all via sync app or API.' });
+                constraints.push('Aggregator storefront (like Supply Gear) needs product sync solution from other brand stores');
+            }
+
+            // Team capacity
+            if (answers.team_capacity === 'solo' || answers.team_capacity === 'small_team') {
+                scores.A += 5;
+                scores.C += 3;
+                scores.D -= 5;
+                scores.E -= 5;
+                reasoning.push({ factor: 'Limited technical resources', supports: 'Options A, C', detail: 'Headed approaches require less specialized development expertise' });
+            } else if (answers.team_capacity === 'dev_team' || answers.team_capacity === 'enterprise') {
+                scores.D += 3;
+                scores.E += 3;
+                reasoning.push({ factor: 'Strong dev resources', supports: 'Options D, E', detail: 'Headless architectures become viable with experienced teams' });
+            }
+
+            // Content needs
+            if (answers.content_needs === 'heavy' || answers.content_needs === 'cms_driven') {
+                scores.D += 5;
+                scores.E += 5;
+                reasoning.push({ factor: 'Content-heavy requirements', supports: 'Options D, E', detail: 'Headless provides superior content flexibility and CMS integration' });
+            } else if (answers.content_needs === 'minimal') {
+                scores.A += 2;
+                scores.B += 2;
+                scores.C += 2;
+            }
+
+            // Timeline/budget
+            if (answers.timeline_budget === 'fast_cheap') {
+                scores.A += 5;
+                scores.D -= 3;
+                scores.E -= 3;
+                reasoning.push({ factor: 'Speed and cost priority', supports: 'Option A', detail: 'Simpler architectures launch faster with lower investment' });
+            } else if (answers.timeline_budget === 'quality' || answers.timeline_budget === 'enterprise_timeline') {
+                scores.D += 2;
+                scores.E += 2;
+            }
+
+            // Find best option
+            let best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+            let alternatives = Object.entries(scores)
+                .filter(([key, val]) => key !== best && val > 0)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 2)
+                .map(([key]) => key);
+
+            return { 
+                recommendation: best, 
+                alternatives, 
+                scores, 
+                reasoning: reasoning.filter(r => r.supports.includes(`Option ${best}`) || r.supports.includes(`Options`)),
+                constraints
+            };
+        }
+
+        function showResults() {
+            document.getElementById('quiz-section').classList.add('hidden');
+            const resultsSection = document.getElementById('results-section');
+            resultsSection.classList.remove('hidden');
+
+            const result = calculateRecommendation();
+            const arch = architectures[result.recommendation];
+
+            let featuresHtml = Object.entries(arch.features).map(([feature, supported]) => `
+                <div class="feature-item ${supported ? 'supported' : 'not-supported'}">
+                    ${supported ? '✓' : '✗'} ${feature}
+                </div>
+            `).join('');
+
+            let reasoningHtml = result.reasoning.map(r => `
+                <li class="reasoning-item">
+                    <span class="reasoning-icon">💡</span>
+                    <div class="reasoning-text">
+                        <strong>${r.factor}</strong><br>
+                        <span>${r.detail}</span>
+                    </div>
+                </li>
+            `).join('');
+
+            let constraintsHtml = result.constraints.length > 0 ? `
+                <div class="reasoning-card" style="border-color: var(--accent-orange);">
+                    <div class="reasoning-title">
+                        <span>⚠️</span> Hard Constraints Identified
+                    </div>
+                    <ul class="reasoning-list">
+                        ${result.constraints.map(c => `
+                            <li class="reasoning-item">
+                                <span class="reasoning-icon">🔒</span>
+                                <div class="reasoning-text">${c}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            ` : '';
+
+            let alternativesHtml = result.alternatives.length > 0 ? `
+                <div class="alternatives-card">
+                    <div class="reasoning-title">
+                        <span>🔄</span> Alternative Options to Consider
+                    </div>
+                    ${result.alternatives.map(alt => `
+                        <div class="alt-option">
+                            <div class="alt-title">${architectures[alt].icon} ${architectures[alt].name}</div>
+                            <div class="alt-desc">${architectures[alt].description}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            let examplesHtml = arch.examples.map(ex => `
+                <div class="example-item">
+                    <div class="example-logo">${ex.name.substring(0, 2).toUpperCase()}</div>
+                    <div>
+                        <div class="example-name">${ex.name}</div>
+                        <div class="example-url">${ex.url}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            let summaryHtml = Object.entries(answers).map(([qId, answer]) => {
+                const q = questions.find(q => q.id === qId);
+                const opt = q.options.find(o => o.value === answer);
+                return `
+                    <tr>
+                        <td>${q.question.split('?')[0]}?</td>
+                        <td>${opt.title}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            resultsSection.innerHTML = `
+                <div class="result-header">
+                    <div class="result-icon">${arch.icon}</div>
+                    <h2>Your Recommended Architecture</h2>
+                </div>
+
+                <div class="recommendation-card">
+                    <div class="recommendation-label">Recommended</div>
+                    <div class="recommendation-title">${arch.name}</div>
+                    <div class="recommendation-desc">${arch.description}</div>
+                    <div class="feature-grid">
+                        ${featuresHtml}
+                    </div>
+                </div>
+
+                ${constraintsHtml}
+
+                <div class="reasoning-card">
+                    <div class="reasoning-title">
+                        <span>🎯</span> Why This Recommendation?
+                    </div>
+                    <ul class="reasoning-list">
+                        ${reasoningHtml}
+                    </ul>
+                </div>
+
+                <div class="reasoning-card">
+                    <div class="reasoning-title">
+                        <span>⚖️</span> Trade-offs to Consider
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <div style="color: var(--accent-green); font-weight: 500; margin-bottom: 0.5rem;">✓ Advantages</div>
+                            <ul style="list-style: none; font-size: 0.875rem; color: var(--text-secondary);">
+                                ${arch.tradeoffs.pros.map(p => `<li style="margin-bottom: 0.25rem;">• ${p}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <div style="color: var(--accent-orange); font-weight: 500; margin-bottom: 0.5rem;">⚠ Considerations</div>
+                            <ul style="list-style: none; font-size: 0.875rem; color: var(--text-secondary);">
+                                ${arch.tradeoffs.cons.map(c => `<li style="margin-bottom: 0.25rem;">• ${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                ${alternativesHtml}
+
+                <div class="examples-card">
+                    <div class="reasoning-title">
+                        <span>🌐</span> Live Examples
+                    </div>
+                    ${examplesHtml}
+                </div>
+
+                <div class="reasoning-card">
+                    <div class="reasoning-title">
+                        <span>📋</span> Your Answers Summary
+                    </div>
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Your Answer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${summaryHtml}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="restartQuiz()">
+                        ↻ Start Over
+                    </button>
+                    <button class="btn btn-primary" onclick="copyResults()">
+                        📋 Copy Results
+                    </button>
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = {};
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        function copyResults() {
+            const result = calculateRecommendation();
+            const arch = architectures[result.recommendation];
+            
+            let text = `# Multi-Storefront Architecture Recommendation\n\n`;
+            text += `## Recommended: ${arch.name}\n\n`;
+            text += `${arch.description}\n\n`;
+            text += `### Key Features\n`;
+            Object.entries(arch.features).forEach(([feature, supported]) => {
+                text += `- ${supported ? '✓' : '✗'} ${feature}\n`;
+            });
+            text += `\n### Reasoning\n`;
+            result.reasoning.forEach(r => {
+                text += `- **${r.factor}**: ${r.detail}\n`;
+            });
+            if (result.constraints.length > 0) {
+                text += `\n### Hard Constraints\n`;
+                result.constraints.forEach(c => {
+                    text += `- ${c}\n`;
+                });
+            }
+            text += `\n### Answers Summary\n`;
+            Object.entries(answers).forEach(([qId, answer]) => {
+                const q = questions.find(q => q.id === qId);
+                const opt = q.options.find(o => o.value === answer);
+                text += `- ${q.question.split('?')[0]}? → ${opt.title}\n`;
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
+
