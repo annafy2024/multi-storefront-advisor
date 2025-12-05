@@ -1551,6 +1551,46 @@
                 </div>
             ` : '';
 
+            // Create full ranking of all options
+            let rankedOptions = Object.entries(result.scores)
+                .sort((a, b) => b[1] - a[1])
+                .map(([key, score], index) => ({
+                    rank: index + 1,
+                    key,
+                    score,
+                    arch: architectures[key],
+                    isRecommended: index === 0,
+                    isEliminated: score < 0
+                }));
+
+            let rankingHtml = `
+                <div class="reasoning-card">
+                    <div class="reasoning-title">
+                        <span>🏆</span> Architecture Ranking (Best to Worst Fit)
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        ${rankedOptions.map(opt => `
+                            <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; margin-bottom: 0.5rem; background: ${opt.isRecommended ? 'var(--accent-green-dim)' : opt.isEliminated ? 'var(--accent-red-dim)' : 'var(--bg-secondary)'}; border-radius: 8px; border: 1px solid ${opt.isRecommended ? 'var(--accent-green)' : opt.isEliminated ? 'var(--accent-red)' : 'var(--border)'};">
+                                <div style="width: 32px; height: 32px; background: ${opt.isRecommended ? 'var(--accent-green)' : opt.isEliminated ? 'var(--accent-red)' : 'var(--bg-hover)'}; color: ${opt.isRecommended || opt.isEliminated ? '#000' : 'var(--text-primary)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;">
+                                    ${opt.isEliminated ? '✗' : '#' + opt.rank}
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; color: ${opt.isEliminated ? 'var(--text-muted)' : 'var(--text-primary)'};">
+                                        ${opt.arch.icon} ${opt.arch.name}
+                                        ${opt.isRecommended ? '<span style="color: var(--accent-green); font-size: 0.75rem; margin-left: 0.5rem;">← RECOMMENDED</span>' : ''}
+                                        ${opt.isEliminated ? '<span style="color: var(--accent-red); font-size: 0.75rem; margin-left: 0.5rem;">ELIMINATED</span>' : ''}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">${opt.arch.shortName}</div>
+                                </div>
+                                <div style="font-family: 'Space Mono', monospace; font-size: 0.875rem; color: ${opt.score > 0 ? 'var(--accent-green)' : opt.score < 0 ? 'var(--accent-red)' : 'var(--text-muted)'};">
+                                    ${opt.score > 0 ? '+' : ''}${opt.score} pts
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
             let alternativesHtml = result.alternatives.length > 0 ? `
                 <div class="alternatives-card">
                     <div class="reasoning-title">
@@ -1632,6 +1672,8 @@
                     </div>
                 </div>
 
+                ${rankingHtml}
+
                 ${alternativesHtml}
 
                 <div class="examples-card">
@@ -1639,6 +1681,28 @@
                         <span>🌐</span> Live Examples
                     </div>
                     ${examplesHtml}
+                </div>
+
+                <div class="reasoning-card" style="border-color: var(--accent-purple);">
+                    <div class="reasoning-title">
+                        <span>📚</span> Recommended Enablement Material
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <a href="https://docs.google.com/presentation/d/1UHAMsPGjUgeK2QcP6ya74ZN7XYfT2-Le9mxSi8O6VUg/edit" 
+                           target="_blank" 
+                           style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--accent-purple-dim); border-radius: 10px; text-decoration: none; color: var(--text-primary); transition: all 0.2s ease;"
+                           onmouseover="this.style.transform='translateX(4px)'" 
+                           onmouseout="this.style.transform='translateX(0)'">
+                            <div style="width: 48px; height: 48px; background: var(--accent-purple); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                🎓
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Multi-Storefronts Enablement</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Deep-dive training deck covering architecture patterns, implementation approaches, and real-world examples</div>
+                            </div>
+                            <div style="color: var(--accent-purple);">→</div>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="reasoning-card">
