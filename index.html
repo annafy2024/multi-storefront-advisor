@@ -527,6 +527,106 @@
             display: none !important;
         }
 
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 540px;
+            width: 100%;
+            padding: 2rem;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            background: var(--accent-orange-dim);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
+        }
+
+        .modal-content ul {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .modal-content li {
+            padding: 0.5rem 0;
+            padding-left: 1.75rem;
+            position: relative;
+        }
+
+        .modal-content li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .container {
@@ -613,6 +713,36 @@
 </head>
 <body>
     <div class="bg-pattern"></div>
+
+    <!-- Disclaimer Modal -->
+    <div id="disclaimer-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-icon">💡</div>
+            <h2 class="modal-title">Before You Begin</h2>
+            <div class="modal-content">
+                <p>
+                    This wizard is designed to provide <strong>guidance, not a definitive answer</strong>. 
+                    Every merchant's situation is unique, and the final architecture decision should involve 
+                    deeper discovery and expert consultation.
+                </p>
+                <p>Use this tool to:</p>
+                <ul>
+                    <li><strong>Understand the key factors</strong> that influence multi-storefront architecture decisions</li>
+                    <li><strong>Get a baseline recommendation</strong> as a starting point for further discussion</li>
+                    <li><strong>Identify trade-offs</strong> between different approaches</li>
+                </ul>
+                <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.875rem; color: var(--text-muted);">
+                    The recommendation should be validated with a Solutions Architect who can assess 
+                    your specific requirements, integrations, and business context.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="acceptDisclaimer()">
+                    I Understand — Let's Start →
+                </button>
+            </div>
+        </div>
+    </div>
     
     <div class="container">
         <header>
@@ -1082,10 +1212,19 @@
         let currentQuestion = 0;
         let answers = {};
 
-        function startQuiz() {
+        function showDisclaimer() {
+            document.getElementById('disclaimer-modal').classList.remove('hidden');
+        }
+
+        function acceptDisclaimer() {
+            document.getElementById('disclaimer-modal').classList.add('hidden');
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('quiz-section').classList.remove('hidden');
             renderQuestion();
+        }
+
+        function startQuiz() {
+            showDisclaimer();
         }
 
         function renderQuestion() {
