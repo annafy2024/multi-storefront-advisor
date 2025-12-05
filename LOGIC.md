@@ -103,7 +103,27 @@ After constraints are applied, remaining questions add/subtract points based on 
 - Subdomains enable shared cookies (easier cart sharing) → favors single-store options
 - Unique root domains work best with store separation
 
-#### Q2: Checkout Branding
+#### Q2: Storefront Driver (Multi-Market vs Multi-Brand)
+
+| Answer | Impact |
+|--------|--------|
+| `multi_market` | A += 3, B += 5, C -= 2 |
+| `multi_brand` | C += 3, D += 3, E += 3 |
+| `both` | D += 5, E += 3 |
+
+**Reasoning:**
+- **Multi-market (same brand internationally):** Shopify Markets + Liquid themes handle international expansion natively. Theme customizer allows market-specific content, Price Lists handle localized pricing. No headless required.
+- **Multi-brand (distinct brands):** Distinct brand identities benefit from architectural separation — either via Hydrogen multi-storefront (single backend) or separate stores.
+- **Both (multi-brand + international):** Complex scenario where single store + Hydrogen + Markets scales best. Multi-store multiplies sync complexity across brands AND markets.
+
+**Why This Matters:**
+Many merchants conflate "multi-storefront" needs that are actually:
+- **International expansion** (same brand) → Shopify Markets handles this natively
+- **True multi-brand** (different brands) → Requires architectural decisions
+
+We shouldn't push merchants to headless unnecessarily when Markets solves their problem.
+
+#### Q3: Checkout Branding
 
 | Answer | Impact |
 |--------|--------|
@@ -164,16 +184,26 @@ When brands have separate catalogs but one storefront aggregates all (e.g., Supp
 
 *Currently minimal scoring impact — included for completeness and future refinement.*
 
-#### Q8: Team Capacity
+#### Q8: Team Capacity (UPDATED with Agency Option)
 
 | Answer | Impact |
 |--------|--------|
-| `solo` or `small_team` | A += 5, C += 3, D -= 5, E -= 5 |
+| `solo` | A += 5, C += 3, D -= 5, E -= 5 |
+| `small_team` | A += 3, C += 2, D -= 3, E -= 3 |
+| `agency_augmented` | C += 2, D += 2 (no headless penalty) |
 | `dev_team` or `enterprise` | D += 3, E += 3 |
 
 **Reasoning:**
-- Limited technical resources → favor headed approaches (standard Shopify skills)
-- Strong dev resources → headless becomes practical
+- **Solo:** Headed approaches only — limited resources can't support headless complexity.
+- **Small team:** Headed preferred, but headless penalty is softer than solo.
+- **Agency augmented (NEW):** Agency partnerships bridge capability gaps. Headless becomes viable when experienced agency handles implementation and provides knowledge transfer. No penalty applied.
+- **Dev team/Enterprise:** Full headless options open up with experienced teams.
+
+**Why This Matters:**
+The original logic heavily penalized headless options for small teams. But reality shows:
+- Many successful Plus merchants partner with agencies for implementation
+- Agencies provide knowledge transfer to internal teams over time
+- "Small team + agency" is a viable path to headless that shouldn't be ignored
 
 #### Q9: Content Needs
 
@@ -367,11 +397,23 @@ Each contributing factor is listed with its impact:
 
 ---
 
+## Reference Implementations
+
+| Merchant | Pattern | Architecture |
+|----------|---------|--------------|
+| **Kao Brands** (us.jergens.com) | Multi-brand + international | Single store + Hydrogen multi-storefront + Markets |
+| **Being Well** | Same-brand multi-market | Single store + Liquid alias domains |
+| **Cobra/Puma Golf** | Multi-brand (distinct) | Separate stores (headed) |
+| **Defyned Brands** | Multi-brand headless | Separate stores + custom frontends |
+| **Urban Planet** | Sub-brands | Single store + sections |
+
+---
+
 ## References
 
 - **Source Material:** Multi-storefronts Enablement deck (Chris Hannaby, Matt Cohn, Oct 2024)
 - **Validation:** A10 technical assessment case study
-- **Live Examples:** Urban Planet (A), Being Well (B), Cobra/Puma Golf (C), Defyned Brands (E)
+- **Live Examples:** Urban Planet (A), Being Well (B), Cobra/Puma Golf (C), Kao Brands (D), Defyned Brands (E)
 
 ---
 

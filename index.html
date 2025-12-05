@@ -758,7 +758,7 @@
             <div class="start-icon">🎯</div>
             <h2 class="start-title">Architecture Decision Tool</h2>
             <p class="start-desc">
-                Answer 10 questions about your multi-storefront requirements and get a personalized architecture recommendation with reasoning.
+                Answer 11 questions about your multi-storefront requirements and get a personalized architecture recommendation with reasoning.
             </p>
             <div class="start-features">
                 <div class="start-feature">
@@ -767,7 +767,7 @@
                 </div>
                 <div class="start-feature">
                     <div class="start-feature-icon">📊</div>
-                    <div class="start-feature-text">10 questions</div>
+                    <div class="start-feature-text">11 questions</div>
                 </div>
                 <div class="start-feature">
                     <div class="start-feature-icon">💡</div>
@@ -835,6 +835,29 @@
                         value: 'mixed',
                         title: 'Mix of domains and subdomains',
                         example: 'brand-a.com, pro.brand-a.com, brand-b.com'
+                    }
+                ]
+            },
+            {
+                id: 'storefront_driver',
+                category: 'Architecture',
+                question: 'What\'s driving your multi-storefront need?',
+                hint: 'This helps determine if native Shopify features (like Markets) can handle your requirements.',
+                options: [
+                    {
+                        value: 'multi_brand',
+                        title: 'Different brand identities',
+                        example: 'Brand A and Brand B are distinct companies or product lines'
+                    },
+                    {
+                        value: 'multi_market',
+                        title: 'Same brand, different regions/languages',
+                        example: 'US store, Canada store, EU store — all same brand'
+                    },
+                    {
+                        value: 'both',
+                        title: 'Multiple brands AND international expansion',
+                        example: 'Brand A needs US + EU, Brand B needs US + APAC'
                     }
                 ]
             },
@@ -1004,23 +1027,28 @@
             {
                 id: 'team_capacity',
                 category: 'Implementation',
-                question: 'What development resources are available for implementation?',
-                hint: 'This affects the feasibility of headless vs. headed approaches.',
+                question: 'What development resources are available for implementation and ongoing maintenance?',
+                hint: 'Consider both initial build and long-term maintenance. Agency partnerships can augment internal capabilities.',
                 options: [
                     {
                         value: 'solo',
                         title: 'Solo operator or small non-technical team',
-                        example: '1-2 people managing e-commerce, limited dev skills'
+                        example: '1-2 people managing e-commerce, limited dev skills, no agency budget'
                     },
                     {
                         value: 'small_team',
                         title: 'Small team with some technical capacity',
-                        example: '3-5 people, can handle theme customization'
+                        example: '3-5 people, can handle theme customization, limited agency support'
+                    },
+                    {
+                        value: 'agency_augmented',
+                        title: 'Small internal team + agency partnership',
+                        example: 'Limited internal dev, but partnering with Shopify Plus agency for implementation'
                     },
                     {
                         value: 'dev_team',
                         title: 'In-house dev team or strong agency partnership',
-                        example: 'React/Next.js capabilities, can build custom'
+                        example: 'React/Next.js capabilities, can build and maintain custom solutions'
                     },
                     {
                         value: 'enterprise',
@@ -1176,10 +1204,11 @@
                     'Clean B2B separation': false
                 },
                 examples: [
+                    { name: 'Kao Brands (Jergens)', url: 'us.jergens.com — multi-brand + Markets' },
                     { name: 'Custom Hydrogen builds', url: 'Multiple custom storefronts' }
                 ],
                 tradeoffs: {
-                    pros: ['Ultimate frontend flexibility', 'Single catalog', 'Shared cart across domains', 'Best performance'],
+                    pros: ['Ultimate frontend flexibility', 'Single catalog', 'Shared cart across domains', 'Best performance', 'Markets handles localization'],
                     cons: ['High dev cost', 'No checkout separation', 'Unified accounts', 'Requires experienced team']
                 }
             },
@@ -1315,6 +1344,38 @@
                 reasoning.push({ factor: 'Unique domains', supports: 'Options C, E', detail: 'Unique domains work best with separate stores' });
             }
 
+            // Storefront driver - Multi-market vs Multi-brand
+            if (answers.storefront_driver === 'multi_market') {
+                // Markets + Liquid handles same-brand international well
+                scores.A += 3;
+                scores.B += 5;
+                scores.C -= 2;
+                reasoning.push({ 
+                    factor: 'Multi-market (same brand internationally)', 
+                    supports: 'Options A, B', 
+                    detail: 'Shopify Markets + Liquid themes handle international expansion natively. Use theme customizer market selector for market-specific content and Price Lists for localized pricing — no headless required.' 
+                });
+            } else if (answers.storefront_driver === 'multi_brand') {
+                // True multi-brand benefits from architectural separation
+                scores.C += 3;
+                scores.D += 3;
+                scores.E += 3;
+                reasoning.push({ 
+                    factor: 'Multi-brand (distinct brand identities)', 
+                    supports: 'Options C, D, E', 
+                    detail: 'Distinct brand identities benefit from architectural separation. Hydrogen multi-storefront (D) provides single backend with separate frontends. Multi-store (C, E) provides complete isolation.' 
+                });
+            } else if (answers.storefront_driver === 'both') {
+                // Complex: multi-brand + multi-market
+                scores.D += 5;
+                scores.E += 3;
+                reasoning.push({ 
+                    factor: 'Multi-brand + international complexity', 
+                    supports: 'Options D, E', 
+                    detail: 'Multiple brands each needing international presence. Single store + Hydrogen with Markets (D) scales elegantly — one backend, multiple brand frontends, Markets handles localization. Multi-store (E) works but multiplies product sync complexity across brands AND markets.' 
+                });
+            }
+
             // Checkout branding - HARD CONSTRAINT
             if (answers.checkout_branding === 'required') {
                 scores.A = -100;
@@ -1386,17 +1447,29 @@
                 constraints.push('Aggregator storefront (like Supply Gear) needs product sync solution from other brand stores');
             }
 
-            // Team capacity
-            if (answers.team_capacity === 'solo' || answers.team_capacity === 'small_team') {
+            // Team capacity - updated with agency consideration
+            if (answers.team_capacity === 'solo') {
                 scores.A += 5;
                 scores.C += 3;
                 scores.D -= 5;
                 scores.E -= 5;
-                reasoning.push({ factor: 'Limited technical resources', supports: 'Options A, C', detail: 'Headed approaches require less specialized development expertise' });
+                reasoning.push({ factor: 'Solo operator — limited resources', supports: 'Options A, C', detail: 'Headed approaches require less specialized expertise. Standard Shopify skills are more accessible.' });
+            } else if (answers.team_capacity === 'small_team') {
+                scores.A += 3;
+                scores.C += 2;
+                scores.D -= 3;
+                scores.E -= 3;
+                reasoning.push({ factor: 'Small technical team', supports: 'Options A, C', detail: 'Headed approaches are more manageable. Consider agency partnership if headless requirements emerge.' });
+            } else if (answers.team_capacity === 'agency_augmented') {
+                // Key change: agency partnership opens up headless options
+                scores.C += 2;
+                scores.D += 2;
+                // Don't penalize headless when agency is involved
+                reasoning.push({ factor: 'Agency partnership available', supports: 'Options C, D', detail: 'Agency partnerships can bridge internal capability gaps. Headless becomes viable with experienced agency for implementation and knowledge transfer to internal team.' });
             } else if (answers.team_capacity === 'dev_team' || answers.team_capacity === 'enterprise') {
                 scores.D += 3;
                 scores.E += 3;
-                reasoning.push({ factor: 'Strong dev resources', supports: 'Options D, E', detail: 'Headless architectures become viable with experienced teams' });
+                reasoning.push({ factor: 'Strong development resources', supports: 'Options D, E', detail: 'Headless architectures become practical with experienced teams who can build and maintain custom solutions.' });
             }
 
             // Content needs
